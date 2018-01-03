@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+ appdb:
+  image: mariadb
+  volumes:
+   - ./data/appdb:/var/lib/mysql
+  #restart: always
+  environment:
+   MYSQL_ROOT_PASSWORD: rootpassword
+   MYSQL_DATABASE: homestead
+   MYSQL_USER: homestead
+   MYSQL_PASSWORD: secret
+
+ #web app
+ webpress:
+  build: webpress
+  depends_on:
+   - appdb
+  ports:
+   - "9094:80"
+  #restart: always
+  volumes:
+   - ./data/webpress/webpress:/var/www/html
+   - ./data/webpress/ap2log:/var/log/apache2
+ 
+ #source from chm file 
+ source:
+  build: source
+  ports:
+   - "8888:8888"
+  #restart: always
+  volumes:
+   - ./data/source:/data/
+ 
+ #read from source and write to db
+ spiderpress:
+  build: spiderpress
+  #restart: always
+  depends_on:
+   - appdb
+  volumes:
+   - ./data/spiderpress:/code
